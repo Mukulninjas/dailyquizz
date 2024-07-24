@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+ 
+datasource db {
+  provider = "postgresql"
+  url = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+ 
+model Subject {
+  id       Int       @id @default(autoincrement())
+  name     String
+  examId   Int
+  exam     Exam      @relation(fields: [examId], references: [id])
+  chapters Chapter[]
+}
+
+model Chapter {
+  id        Int       @id @default(autoincrement())
+  name      String
+  subjectId Int
+  subject   Subject   @relation(fields: [subjectId], references: [id])
+  questions Question[]
+}
+
+model Exam {
+  id        Int       @id @default(autoincrement())
+  name      String
+  parent    Int?
+  child     Boolean   @default(false)
+  parentExam Exam?    @relation("ExamToExam", fields: [parent], references: [id])
+  childExams Exam[]   @relation("ExamToExam")
+  subjects  Subject[]
+}
+
+model Question {
+  id              Int       @id @default(autoincrement())
+  question        String
+  options         String[]
+  correctAnswers  String[]
+  solution        String
+  chapterId       Int
+  isPreviousYear  Boolean   @default(false)
+  previousYear    DateTime?
+  level           String    @default("Basic")
+  chapter         Chapter   @relation(fields: [chapterId], references: [id])
+}
