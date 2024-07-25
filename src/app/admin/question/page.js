@@ -1,5 +1,5 @@
+"use client"
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 
 export default function QuestionsPage() {
     const [exams, setExams] = useState([]);
@@ -23,9 +23,9 @@ export default function QuestionsPage() {
 
     const fetchExams = async () => {
         try {
-            const response = await axios.get('/api/exams');
-            console.log('Fetched Exams:', response.data); // Debug log
-            setExams(response.data);
+            const response = await fetch('/api/exams');
+            const exams = await response.json();
+            setExams(exams);
         } catch (error) {
             console.error('Error fetching exams:', error);
         }
@@ -33,9 +33,9 @@ export default function QuestionsPage() {
 
     const fetchSubjects = async (examId) => {
         try {
-            const response = await axios.get(`/api/subjects?examId=${examId}`);
-            console.log('Fetched Subjects:', response.data); // Debug log
-            setSubjects(response.data);
+            const response = await fetch(`/api/subjects?examId=${examId}`);
+            const subjects = await response.json();
+            setSubjects(subjects);
         } catch (error) {
             console.error('Error fetching subjects:', error);
         }
@@ -43,9 +43,9 @@ export default function QuestionsPage() {
 
     const fetchQuestions = async () => {
         try {
-            const response = await axios.get(`/api/questions?subjectId=${selectedSubject}`);
-            console.log('Fetched Questions:', response.data); // Debug log
-            setQuestions(response.data);
+            const response = await fetch(`/api/questions?subjectId=${selectedSubject}`);
+            const questions = await response.json();
+            setQuestions(questions);
         } catch (error) {
             console.error('Error fetching questions:', error);
         }
@@ -54,11 +54,11 @@ export default function QuestionsPage() {
     const handleUploadQuestion = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('/api/questions', {
+            const response = await fetch('/api/questions', {body: JSON.stringify({
                 subjectId: selectedSubject,
                 text: questionText
+            }), method: 'POST'
             });
-            console.log('Uploaded Question:', response.data); // Debug log
             setQuestionText('');
             fetchQuestions();
         } catch (error) {
@@ -75,7 +75,7 @@ export default function QuestionsPage() {
                     <label htmlFor="exam">Select Exam</label>
                     <select id="exam" value={selectedExam} onChange={(e) => setSelectedExam(e.target.value)}>
                         <option value="">Select Exam</option>
-                        {exams.map((exam) => (
+                        {Array.isArray(exams) && exams?.map((exam) => (
                             <option key={exam.id} value={exam.id}>{exam.name}</option>
                         ))}
                     </select>
